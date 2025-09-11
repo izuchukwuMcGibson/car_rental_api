@@ -33,10 +33,18 @@ const userSchema = new mongoose.Schema({
     otpVerified: {
         type: Boolean,
         default: false
-    }
+    },
+     googleId: {
+     type: String,
+     sparse: true
+  },
+  profilePicture: {
+    type: String
+  }
 }, {
     timestamps: true,
     versionKey: false
+
 });
 
 const User = mongoose.model('User', userSchema);
