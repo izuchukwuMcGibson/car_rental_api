@@ -4,12 +4,13 @@ const morgan = require('morgan');
 const connectDB = require('./src/config/db');
 const userRouter = require('./src/routes/user.routes');
 const carRouter = require('./src/routes/cars.routes');
-
+const cors = require('cors')
 dotenv.config();
 const app = express();
 
 app.use(express.json())
 app.use(morgan('dev'))
+app.use(cors())
 const PORT = process.env.PORT || 4500;
 
 app.get('/', (req, res)=> {
