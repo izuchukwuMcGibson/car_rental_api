@@ -27,6 +27,9 @@ const userSchema = new mongoose.Schema({
     token: {
         type: String
     },
+    emailToken:{
+        type: String
+    },
     otp: {
         type: Number
     },

@@ -79,9 +79,10 @@ const verifyEmail = async (req, res) => {
         .status(404)
         .json({ message: "User with this token does not exist" });
     }
-    user.token = null;
-    user.isVerified = true;
 
+    user.isVerified = true;
+    user.emailToken = null;
+    
     //send successful email verification
     const successTemplate = emailTemplate.emailVerificationSuccessTemplate(
       user.name
@@ -93,10 +94,7 @@ const verifyEmail = async (req, res) => {
       successTemplate.text
     );
     await user.save();
-    res.status(200).
-    type('text/plain').
-    send('user verified successfully').
-    json({ message: "Email verified successfully" });
+    res.status(200).json({ message: "Email verified successfully" });
   } catch (error) {
     return res.status(500).json({ message: `${error.message}` });
   }
