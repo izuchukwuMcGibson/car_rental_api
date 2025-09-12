@@ -5,11 +5,10 @@ const jwt = require("jsonwebtoken");
 const { v4: uuidv4 } = require("uuid");
 const { sendEmail, sendTemplateEmail } = require("../config/email");
 const emailTemplate = require("../templates/email.templates");
-const { OAuth2Client } = require('google-auth-library');
-const { google } = require('googleapis');
-const crypto = require('crypto');
-const axios = require('axios')
-
+const { OAuth2Client } = require("google-auth-library");
+const { google } = require("googleapis");
+const crypto = require("crypto");
+const axios = require("axios");
 
 const signUp = async (req, res) => {
   const { name, email, password } = req.body;
@@ -33,7 +32,7 @@ const signUp = async (req, res) => {
 
   //Generate token from email
   const token = await jwt.sign({ email: email }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN,
+    expiresIn: process.env.JWT_EXPIRES_IN || "7d",
   });
 
   //generate email token
@@ -51,7 +50,9 @@ const signUp = async (req, res) => {
 
   try {
     await newUser.save();
-    res.status(201).json({ message: "User created successfully", token: token });
+    res
+      .status(201)
+      .json({ message: "User created successfully", token: token });
   } catch (error) {
     console.error(error.message);
   }
@@ -81,28 +82,22 @@ const verifyEmail = async (req, res) => {
     user.token = null;
     user.isVerified = true;
 
-      //send successful email verification
+    //send successful email verification
     const successTemplate = emailTemplate.emailVerificationSuccessTemplate(
-    user.name
-  );
-  await sendTemplateEmail(
-    user.email,
-    successTemplate.subject,
-    successTemplate.html,
-    successTemplate.text
-  );
+      user.name
+    );
+    await sendTemplateEmail(
+      user.email,
+      successTemplate.subject,
+      successTemplate.html,
+      successTemplate.text
+    );
     await user.save();
     res.status(200).json({ message: "Email verified successfully" });
-
-  } catch (error){
+  } catch (error) {
     return res.status(500).json({ message: `${error.message}` });
   }
-
 };
-
-
-
-
 
 //login
 const login = async (req, res) => {
@@ -119,28 +114,34 @@ const login = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-  //check if user is verified
-  if(!user.isVerified){
-   return res.status(401).json({ message: "please verify your email first"})}
+    //check if user is verified
+    if (!user.isVerified) {
+      return res
+        .status(401)
+        .json({ message: "please verify your email first" });
+    }
 
-   //check password
+    //check password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(401).json({ message: "Invalid credentials" });
-    } 
+    }
 
-  //Generate jwt token
-  const payload = {
-     id : user._id,
-    email: user.email
-  }
-  const token = jwt.sign(payload, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN,
-  });
+    //Generate jwt token
+    const payload = {
+      id: user._id,
+      email: user.email,
+    };
+    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: process.env.JWT_EXPIRES_IN || "7d",
+    });
 
-  const loginTime = new Date().toLocaleString();
-  const loginTemplate = emailTemplate.loginNotificationTemplate(user.name, loginTime);
-  await sendTemplateEmail(     
+    const loginTime = new Date().toLocaleString();
+    const loginTemplate = emailTemplate.loginNotificationTemplate(
+      user.name,
+      loginTime
+    );
+    await sendTemplateEmail(
       email,
       loginTemplate.subject,
       loginTemplate.html,
@@ -149,23 +150,23 @@ const login = async (req, res) => {
 
     res.status(200).json({
       message: "Login successful",
-      token
+      token,
     });
   } catch (error) {
     return res.status(500).json({ message: "Server error" });
   }
 };
 
-const makeAdmin = async(req,res) =>{
+const makeAdmin = async (req, res) => {
   const { userId } = req.params;
   const user = await User.findById(userId);
-  if(!user){
-    return res.status(404).json({ message : "user not found"})
+  if (!user) {
+    return res.status(404).json({ message: "user not found" });
   }
   user.isAdmin = true;
   await user.save();
-  return res.status(200).json({ message: "User is now an admin",user });
-}
+  return res.status(200).json({ message: "User is now an admin", user });
+};
 
 const forgotPassword = async (req, res) => {
   const { email } = req.body;
@@ -184,7 +185,7 @@ const forgotPassword = async (req, res) => {
 
     // Generate reset token
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    user.otp = otp
+    user.otp = otp;
     await user.save();
 
     // Send reset password email
@@ -200,8 +201,7 @@ const forgotPassword = async (req, res) => {
   } catch (error) {
     return res.status(500).json({ message: "Server error" });
   }
-}
-
+};
 
 const verifyOtp = async (req, res) => {
   const { otp } = req.body;
@@ -254,7 +254,8 @@ const resetPassword = async (req, res) => {
     await user.save();
 
     // Send password reset confirmation email
-    const confirmationTemplate = emailTemplate.passwordResetConfirmationTemplate(user.name);
+    const confirmationTemplate =
+      emailTemplate.passwordResetConfirmationTemplate(user.name);
     await sendTemplateEmail(
       user.email,
       confirmationTemplate.subject,
@@ -269,16 +270,14 @@ const resetPassword = async (req, res) => {
   }
 };
 
-
-
-
 //Google authentication
 
 // Initialize Google OAuth client
 const googleClient = new OAuth2Client(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
-  process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3000/api/users/google/callback'
+  process.env.GOOGLE_REDIRECT_URI ||
+    "http://localhost:3000/api/users/google/callback"
 );
 
 // Keep all your existing functions...
@@ -288,56 +287,63 @@ const googleClient = new OAuth2Client(
 // Generate Google auth URL
 const getGoogleAuthURL = (req, res) => {
   const url = googleClient.generateAuthUrl({
-    access_type: 'offline',
-    prompt: 'consent',
+    access_type: "offline",
+    prompt: "consent",
     scope: [
-      'https://www.googleapis.com/auth/userinfo.profile',
-      'https://www.googleapis.com/auth/userinfo.email'
-    ]
+      "https://www.googleapis.com/auth/userinfo.profile",
+      "https://www.googleapis.com/auth/userinfo.email",
+    ],
   });
-  
+
   res.json({ url });
 };
 
 const googleCallback = async (req, res) => {
   try {
     const { code } = req.query;
-    
+
     if (!code) {
-      return res.status(400).json({ message: "Authorization code not received" });
+      return res
+        .status(400)
+        .json({ message: "Authorization code not received" });
     }
 
-    console.log('Received authorization code:', code); // Debug log
-    
+    console.log("Received authorization code:", code); // Debug log
+
     // Exchange code for access token
-    const { data } = await axios.post('https://oauth2.googleapis.com/token', {
+    const { data } = await axios.post("https://oauth2.googleapis.com/token", {
       client_id: process.env.GOOGLE_CLIENT_ID,
       client_secret: process.env.GOOGLE_CLIENT_SECRET,
       code,
-      grant_type: 'authorization_code',
-      redirect_uri: process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3000/api/users/google/callback'
+      grant_type: "authorization_code",
+      redirect_uri:
+        process.env.GOOGLE_REDIRECT_URI ||
+        "http://localhost:3000/api/users/google/callback",
     });
 
-    console.log('Token exchange successful'); // Debug log
+    console.log("Token exchange successful"); // Debug log
 
     // Get user info from Google
-    const { data: profile } = await axios.get('https://www.googleapis.com/oauth2/v2/userinfo', {
-      headers: { Authorization: `Bearer ${data.access_token}` }
-    });
+    const { data: profile } = await axios.get(
+      "https://www.googleapis.com/oauth2/v2/userinfo",
+      {
+        headers: { Authorization: `Bearer ${data.access_token}` },
+      }
+    );
 
-    console.log('Google profile data:', profile); // Debug log
+    console.log("Google profile data:", profile); // Debug log
 
     // Check if user already exists
     let user = await User.findOne({ email: profile.email });
-    
+
     if (!user) {
-      console.log('Creating new user for:', profile.email);
-      
+      console.log("Creating new user for:", profile.email);
+
       // Generate a secure random password
-      const crypto = require('crypto');
-      const randomPassword = crypto.randomBytes(32).toString('hex');
+      const crypto = require("crypto");
+      const randomPassword = crypto.randomBytes(32).toString("hex");
       const hashedPassword = await bcrypt.hash(randomPassword, 10);
-      
+
       // Create new user
       user = new User({
         name: profile.name,
@@ -345,14 +351,14 @@ const googleCallback = async (req, res) => {
         password: hashedPassword, // Required by your schema
         googleId: profile.id,
         avatar: profile.picture,
-        isVerified: true
+        isVerified: true,
       });
-      
+
       await user.save();
-      console.log('New user created successfully:', user._id);
+      console.log("New user created successfully:", user._id);
     } else {
-      console.log('Existing user found:', user.email);
-      
+      console.log("Existing user found:", user.email);
+
       // Update existing user with Google ID if not present
       if (!user.googleId) {
         user.googleId = profile.id;
@@ -364,49 +370,54 @@ const googleCallback = async (req, res) => {
 
     // Generate JWT token
     const token = jwt.sign(
-      { 
+      {
         id: user._id, // Use 'id' to match your verifyGoogleToken function
         userId: user._id,
         email: user.email,
-        name: user.name 
-      }, 
+        name: user.name,
+      },
       process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+      { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
     );
 
     // Redirect to frontend with token
-    const redirectUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/success?token=${token}`;
-    console.log('Redirecting to:', redirectUrl); // Debug log
-    
+    const redirectUrl = `${
+      process.env.FRONTEND_URL || "http://localhost:3000"
+    }/auth/success?token=${token}`;
+    console.log("Redirecting to:", redirectUrl); // Debug log
+
     res.redirect(redirectUrl);
-    
   } catch (error) {
-    console.error('Google authentication error:', error);
-    console.error('Error details:', error.response?.data || error.message);
-    
-    res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/error?message=${encodeURIComponent(error.message)}`);
+    console.error("Google authentication error:", error);
+    console.error("Error details:", error.response?.data || error.message);
+
+    res.redirect(
+      `${
+        process.env.FRONTEND_URL || "http://localhost:3000"
+      }/auth/error?message=${encodeURIComponent(error.message)}`
+    );
   }
 };
 // Verify Google ID token directly from frontend
 const verifyGoogleToken = async (req, res) => {
   const { token } = req.body;
-  
+
   if (!token) {
     return res.status(400).json({ message: "Token is required" });
   }
-  
+
   try {
     const ticket = await googleClient.verifyIdToken({
       idToken: token,
-      audience: process.env.GOOGLE_CLIENT_ID
+      audience: process.env.GOOGLE_CLIENT_ID,
     });
-    
+
     const payload = ticket.getPayload();
     const { sub: googleId, email, name, picture } = payload;
-    
+
     // Check if user exists
     let user = await User.findOne({ email });
-    
+
     if (!user) {
       // Create new user
       const newUser = new User({
@@ -416,9 +427,9 @@ const verifyGoogleToken = async (req, res) => {
         googleId,
         profilePicture: picture,
       });
-      
+
       user = await newUser.save();
-      
+
       // Send welcome email
       const welcomeTemplate = emailTemplate.welcomeTemplate(name);
       await sendTemplateEmail(
@@ -434,38 +445,39 @@ const verifyGoogleToken = async (req, res) => {
       if (!user.profilePicture) user.profilePicture = picture;
       await user.save();
     }
-    
+
     // Generate JWT token
     const jwtPayload = {
       id: user._id,
-      email: user.email
+      email: user.email,
     };
-    
+
     const jwtToken = jwt.sign(jwtPayload, process.env.JWT_SECRET, {
       expiresIn: process.env.JWT_EXPIRES_IN,
     });
-    
+
     // Record login
     const loginTime = new Date().toLocaleString();
-    const loginTemplate = emailTemplate.loginNotificationTemplate(user.name, loginTime);
-    await sendTemplateEmail(     
+    const loginTemplate = emailTemplate.loginNotificationTemplate(
+      user.name,
+      loginTime
+    );
+    await sendTemplateEmail(
       user.email,
       loginTemplate.subject,
       loginTemplate.html,
       loginTemplate.text
     );
-    
+
     res.status(200).json({
       message: "Google authentication successful",
-      token: jwtToken
+      token: jwtToken,
     });
-    
   } catch (error) {
-    console.error('Google token verification error:', error);
+    console.error("Google token verification error:", error);
     res.status(401).json({ message: "Invalid or expired token" });
   }
 };
-
 
 module.exports = {
   signUp,
@@ -477,5 +489,5 @@ module.exports = {
   resetPassword,
   getGoogleAuthURL,
   googleCallback,
-  verifyGoogleToken
+  verifyGoogleToken,
 };
