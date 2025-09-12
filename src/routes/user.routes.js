@@ -20,7 +20,7 @@ const router = express.Router();
 router.post('/signup', signUp);
 router.post('/login', login);
 router.post('/makeAdmin/:userId', makeAdmin,isAuth,isAdmin);
-router.get('/verify-email/:token',verifyEmail)
+router.post('/verify-email/:token',verifyEmail)
 router.post('/forgot-password',forgotPassword)
 router.post('/verify-otp',verifyOtp)
 router.post('/reset-password/:userId',resetPassword)
