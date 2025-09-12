@@ -1,6 +1,7 @@
 const emailTemplates = {
   // Welcome & Email Verification Template
-  welcomeTemplate: (name, emailToken, baseUrl = 'http://localhost:3000') => {
+  welcomeTemplate: (name, emailToken, baseUrl = 'https://car-rental-api-ks0u.onrender.com') => {
+   
     return {
       subject: 'Welcome to Our Car Rental Service - Please Verify Your Email',
       html: `
@@ -35,7 +36,7 @@ const emailTemplates = {
                 </div>
                 
                 <p>Or click the button below to verify automatically:</p>
-                <a href="${baseUrl}/verify-email/${emailToken}" class="button">Verify Email Address</a>
+                <a href="${baseUrl}/users/verify-email/${emailToken}" class="button">Verify Email Address</a>
                 
                 <p><strong>What's next?</strong></p>
                 <ul>
@@ -61,7 +62,7 @@ const emailTemplates = {
         
         Thank you for signing up! To complete your registration, please verify your email address using this token: ${emailToken}
         
-        Or visit: ${baseUrl}/verify-email/${emailToken}
+        Or visit: ${baseUrl}/users/verify-email/${emailToken}
         
         If you didn't create this account, please ignore this email.
         

@@ -93,7 +93,10 @@ const verifyEmail = async (req, res) => {
       successTemplate.text
     );
     await user.save();
-    res.status(200).json({ message: "Email verified successfully" });
+    res.status(200).
+    type('text/plain').
+    send('user verified successfully').
+    json({ message: "Email verified successfully" });
   } catch (error) {
     return res.status(500).json({ message: `${error.message}` });
   }
