@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Rental Dashboard</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Login to Your Account</h2>
+            <form id="loginForm">
+                <div class="input-group">
+                    <input type="email" id="loginEmail" placeholder="Email" required>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="loginPassword" placeholder="Password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+            <p>Don't have an account? <a href="#" id="showSignup">Sign up here</a></p>
+        </div>
+    </div>
+
+    <!-- Signup Modal -->
+    <div id="signupModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Create Your Account</h2>
+            <form id="signupForm">
+                <div class="input-group">
+                    <input type="text" id="signupName" placeholder="Full Name" required>
+                </div>
+                <div class="input-group">
+                    <input type="email" id="signupEmail" placeholder="Email" required>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="signupPassword" placeholder="Password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Sign Up</button>
+            </form>
+            <p>Already have an account? <a href="#" id="showLogin">Login here</a></p>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="dashboard" class="dashboard" style="display: none;">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h3><i class="fas fa-car"></i> CarRental</h3>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="menu-item active" data-page="home">
+                    <i class="fas fa-home"></i>
+                    <span>Home</span>
+                </li>
+                <li class="menu-item" data-page="available-cars">
+                    <i class="fas fa-car"></i>
+                    <span>Available Cars</span>
+                </li>
+                <li class="menu-item" data-page="my-rentals">
+                    <i class="fas fa-calendar-check"></i>
+                    <span>My Rentals</span>
+                </li>
+                <li class="menu-item" data-page="notifications">
+                    <i class="fas fa-bell"></i>
+                    <span>Notifications</span>
+                    <span class="notification-badge" id="notificationBadge"></span>
+                </li>
+                <li class="menu-item" data-page="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </li>
+                <li class="menu-item logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Search for cars...">
+                </div>
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <img id="userAvatar" src="https://via.placeholder.com/40" alt="User">
+                    </div>
+                    <span id="userName">Loading...</span>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <div class="page-content">
+                <!-- Home Page -->
+                <div id="homePage" class="page active">
+                    <div class="welcome-section">
+                        <h1>Welcome back, <span id="welcomeUserName">User</span>!</h1>
+                        <p>Manage your car rentals and explore available vehicles.</p>
+                    </div>
+
+                    <!-- Stats Cards -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-car"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="availableCarsCount">0</h3>
+                                <p>Available Cars</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="activeRentalsCount">0</h3>
+                                <p>Active Rentals</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="completedRentalsCount">0</h3>
+                                <p>Completed Rentals</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-bell"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="totalNotificationsCount">0</h3>
+                                <p>Notifications</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="section">
+                        <h2>Recent Activity</h2>
+                        <div id="recentActivity" class="activity-list">
+                            <!-- Activity items will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Available Cars Page -->
+                <div id="available-carsPage" class="page">
+                    <h1>Available Cars</h1>
+                    <div class="filters">
+                        <select id="makeFilter">
+                            <option value="">All Makes</option>
+                        </select>
+                        <select id="priceFilter">
+                            <option value="">Price Range</option>
+                            <option value="0-50">₦0 - ₦50,000</option>
+                            <option value="50-100">₦50,000 - ₦100,000</option>
+                            <option value="100-200">₦100,000 - ₦200,000</option>
+                            <option value="200+">₦200,000+</option>
+                        </select>
+                    </div>
+                    <div id="availableCarsList" class="cars-grid">
+                        <!-- Cars will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- My Rentals Page -->
+                <div id="my-rentalsPage" class="page">
+                    <h1>My Rentals</h1>
+                    <div id="myRentalsList" class="rentals-list">
+                        <!-- Rentals will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Notifications Page -->
+                <div id="notificationsPage" class="page">
+                    <div class="notifications-header">
+                        <h1>Notifications</h1>
+                        <button class="btn btn-secondary" id="markAllReadBtn">Mark All as Read</button>
+                    </div>
+                    <div id="notificationsList" class="notifications-list">
+                        <!-- Notifications will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Settings Page -->
+                <div id="settingsPage" class="page">
+                    <h1>Settings</h1>
+                    <div class="settings-content">
+                        <div class="setting-item">
+                            <h3>Profile Information</h3>
+                            <p>Manage your account details and preferences.</p>
+                            <button class="btn btn-primary">Edit Profile</button>
+                        </div>
+                        <div class="setting-item">
+                            <h3>Notifications</h3>
+                            <p>Configure how you receive notifications.</p>
+                            <button class="btn btn-primary">Notification Settings</button>
+                        </div>
+                        <div class="setting-item">
+                            <h3>Security</h3>
+                            <p>Update your password and security settings.</p>
+                            <button class="btn btn-primary">Change Password</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Car Rental Modal -->
+    <div id="carRentalModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Rent This Car</h2>
+            <div id="carRentalForm">
+                <div class="input-group">
+                    <label for="startDate">Start Date:</label>
+                    <input type="date" id="startDate" required>
+                </div>
+                <div class="input-group">
+                    <label for="endDate">End Date:</label>
+                    <input type="date" id="endDate" required>
+                </div>
+                <div class="price-calculation">
+                    <p>Price per day: ₦<span id="pricePerDay">0</span></p>
+                    <p>Total days: <span id="totalDays">0</span></p>
+                    <p><strong>Total price: ₦<span id="totalPrice">0</span></strong></p>
+                </div>
+                <button class="btn btn-primary" id="confirmRentalBtn">Confirm Rental</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/app.js"></script>
+</body>
+</html>
