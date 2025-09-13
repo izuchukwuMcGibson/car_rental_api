@@ -20,7 +20,11 @@ const carSchema = new mongoose.Schema({
         type: Number,
         required: true,
         min: 0
-    },  
+    },
+    image: {
+        type: String,
+        default: null
+    },
     isAvailable: {
         type: Boolean,
         default: true

@@ -1,8 +1,25 @@
 const Car = require("../models/car.schema");
+const Notification = require("../models/notification.schema");
 const { flw } = require('../utils/flutterwave');
 const axios = require('axios');
 const User = require("../models/user.schema");
 
+// Helper function to create notifications
+const createNotification = async (userId, type, title, message, carId = null, rentalId = null) => {
+    try {
+        const notification = new Notification({
+            userId,
+            type,
+            title,
+            message,
+            relatedCarId: carId,
+            relatedRentalId: rentalId
+        });
+        await notification.save();
+    } catch (error) {
+        console.error("Error creating notification:", error);
+    }
+};
 
 const rentCar = async (req, res) => {
     const userId = req.user.id;
@@ -57,6 +74,17 @@ const rentCar = async (req, res) => {
       console.log("checkout link:", checkoutUrl)
       car.status = "pending"; // Set initial status to pending
       await car.save();
+      
+      // Create pending notification
+      await createNotification(
+        userId,
+        'rental_pending',
+        'Rental Request Submitted',
+        `Your rental request for ${car.make} ${car.model} is pending payment verification.`,
+        carId,
+        tx_ref
+      );
+      
       try{
       if( car.status === "pending") { 
       car.isRented = true;
@@ -66,6 +94,17 @@ const rentCar = async (req, res) => {
       car.totalPrice = totalPrice;
       car.status = "approved"; // Set final status to approved
       await car.save();
+      
+      // Create approval notification
+      await createNotification(
+        userId,
+        'rental_approved',
+        'Rental Approved!',
+        `Your rental request for ${car.make} ${car.model} has been approved. Enjoy your ride!`,
+        carId,
+        tx_ref
+      );
+      
       return res.status(200).json({ message: "Car rented successfully"});
     } else{
       return res.status(500).json({message: "Car could not be rented successfully"})
@@ -84,6 +123,18 @@ const rentCar = async (req, res) => {
       car.endDate = endDate;
       car.totalPrice = totalPrice;
       car.status = "rejected"; // Set final status to rejected
+      await car.save();
+      
+      // Create rejection notification
+      await createNotification(
+        userId,
+        'rental_rejected',
+        'Rental Request Rejected',
+        `Your rental request for ${car.make} ${car.model} was rejected due to payment issues.`,
+        carId,
+        tx_ref
+      );
+      
       return res.status(500).json({error: "transaction error"});
     }
 };
