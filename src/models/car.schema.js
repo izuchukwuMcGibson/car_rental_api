@@ -37,6 +37,14 @@ const carSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
+       image: {
+        type: String,
+        trim: true
+    },
+    imagePublicId: {
+        type: String,
+        trim: true
+    },
     startDate: {
         type: Date,
         trim: true

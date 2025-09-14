@@ -10,7 +10,10 @@ const app = express();
 
 app.use(express.json())
 app.use(morgan('dev'))
-app.use(cors())
+app.use(cors({
+    origin: ['http://localhost:3000', 'http://127.0.0.1:5500', 'https://your-frontend-domain.com'],
+    credentials: true
+}));
 const PORT = process.env.PORT || 4500;
 
 app.get('/', (req, res)=> {
