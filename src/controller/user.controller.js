@@ -162,21 +162,30 @@ const login = async (req, res) => {
 const getUser =  async(req,res)=>{
   const { userId }= req.params;
   const user = await User.findById(userId)
+  try{
   if(!user){
     return res.status(400).json({message: "user not found"})
   }
-  return res.status(200).json({message: 'user retrieved successfully', user })
+  return res.status(200).json({message: 'user retrieved successfully', user })}
+  catch(error){
+    return res.status(500).json({message: `internal server error ${error}`})
+  }
 }
 
 const makeAdmin = async (req, res) => {
   const { userId } = req.params;
   const user = await User.findById(userId);
+  try{
   if (!user) {
     return res.status(404).json({ message: "user not found" });
   }
   user.isAdmin = true;
   await user.save();
-  return res.status(200).json({ message: "User is now an admin", user });
+  return res.status(200).json({ message: "User is now an admin", user });}
+  catch(error){
+    return res.status(500).json({ message: `internal server error ${error}`
+    })
+  }
 };
 
 const forgotPassword = async (req, res) => {
