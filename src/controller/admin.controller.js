@@ -88,7 +88,7 @@ const editCar = async (req, res) => {
     let imageUrl = car.image;
     let imagePublicId = car.imagePublicId;
 
-    // Handle image upload (if a new image is uploaded) - no streamifier
+    // Handle image upload (if a new image is uploaded)
     if (req.file) {
       const base64 = req.file.buffer.toString('base64');
       const dataURI = `data:${req.file.mimetype};base64,${base64}`;
