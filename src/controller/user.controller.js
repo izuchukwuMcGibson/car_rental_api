@@ -158,6 +158,16 @@ const login = async (req, res) => {
   }
 };
 
+
+const getUser =  async(req,res)=>{
+  const { userId }= req.params;
+  const user = await User.findById(userId)
+  if(!user){
+    return res.status(400).json({message: "user not found"})
+  }
+  return res.status(200).json({message: 'user retrieved successfully', user })
+}
+
 const makeAdmin = async (req, res) => {
   const { userId } = req.params;
   const user = await User.findById(userId);
@@ -485,6 +495,7 @@ module.exports = {
   login,
   verifyEmail,
   makeAdmin,
+  getUser,
   forgotPassword,
   verifyOtp,
   resetPassword,
