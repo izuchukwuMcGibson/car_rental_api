@@ -190,7 +190,7 @@ const getUser = async (req, res) => {
     return res.status(400).json({ message: "No Authorization string found" });
   }
   try {
-    const token = authHeader.split("")[1];
+    const token = authHeader.split(" ")[1];
     const decoded = await jwt.verify(token, process.env.JWT_SECRET);
     const userId = decoded.userId;
     const user = await User.findById(userId);
