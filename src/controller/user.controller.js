@@ -82,7 +82,7 @@ const verifyEmail = async (req, res) => {
 
     user.isVerified = true;
     user.emailToken = null;
-    
+
     //send successful email verification
     const successTemplate = emailTemplate.emailVerificationSuccessTemplate(
       user.name
@@ -158,33 +158,63 @@ const login = async (req, res) => {
   }
 };
 
+// const jwt = require('jsonwebtoken');
 
-const getUser =  async(req,res)=>{
-  const { userId }= req.params;
-  const user = await User.findById(userId)
-  try{
-  if(!user){
-    return res.status(400).json({message: "user not found"})
+// app.get('/api/users/get-user', (req, res) => {
+//   const authHeader = req.headers.authorization;
+
+//   if (!authHeader) {
+//     return res.status(401).json({ message: 'Authorization token missing' });
+//   }
+
+//   const token = authHeader.split(' ')[1];
+//   try {
+//     const decoded = jwt.verify(token, 'YOUR_SECRET_KEY');
+//     const userId = decoded.userId; // Extract userId from token payload
+
+//     // Fetch user details from the database
+//     const user = getUserById(userId); // Replace with your DB query logic
+//     if (user) {
+//       return res.json(user);
+//     } else {
+//       return res.status(404).json({ message: 'User not found' });
+//     }
+//   } catch (error) {
+//     return res.status(401).json({ message: 'Invalid token' });
+//   }
+// });
+
+const getUser = async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    return res.status(400).json({ message: "No Authorization string found" });
   }
-  return res.status(200).json({message: 'user retrieved successfully', user })}
-  catch(error){
-    return res.status(500).json({message: `internal server error ${error}`})
+  try {
+    const token = authHeader.split("")[1];
+    const decoded = await jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.userId;
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    return res.status(200).json(user);
+  } catch (error) {
+    return res.status(500).json({ message: `Internal server error${error}` });
   }
-}
+};
 
 const makeAdmin = async (req, res) => {
   const { userId } = req.params;
   const user = await User.findById(userId);
-  try{
-  if (!user) {
-    return res.status(404).json({ message: "user not found" });
-  }
-  user.isAdmin = true;
-  await user.save();
-  return res.status(200).json({ message: "User is now an admin", user });}
-  catch(error){
-    return res.status(500).json({ message: `internal server error ${error}`
-    })
+  try {
+    if (!user) {
+      return res.status(404).json({ message: "user not found" });
+    }
+    user.isAdmin = true;
+    await user.save();
+    return res.status(200).json({ message: "User is now an admin", user });
+  } catch (error) {
+    return res.status(500).json({ message: `internal server error ${error}` });
   }
 };
 
