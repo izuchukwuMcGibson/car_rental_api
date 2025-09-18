@@ -31,7 +31,10 @@ const signUp = async (req, res) => {
   }
 
   //Generate token from email
-  const token = await jwt.sign({ email: email }, process.env.JWT_SECRET, {
+  const token = await jwt.sign(
+    { email: email ,
+
+  }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN || "7d",
   });
 
@@ -192,7 +195,7 @@ const getUser = async (req, res) => {
   try {
     const token = authHeader.split(" ")[1];
     const decoded = await jwt.verify(token, process.env.JWT_SECRET);
-    const userId = decoded.userId;
+    const userId = decoded.id;
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
