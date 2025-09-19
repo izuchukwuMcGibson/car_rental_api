@@ -331,7 +331,7 @@ const googleClient = new OAuth2Client(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
   process.env.GOOGLE_REDIRECT_URI ||
-    "http://localhost:3000/api/users/google/callback"
+    "https://car-rental-api-ks0u.onrender.com/api/users/google/callback"
 );
 
 // Keep all your existing functions...
@@ -372,7 +372,7 @@ const googleCallback = async (req, res) => {
       grant_type: "authorization_code",
       redirect_uri:
         process.env.GOOGLE_REDIRECT_URI ||
-        "http://localhost:3000/api/users/google/callback",
+        "https://car-rental-api-ks0u.onrender.com/api/users/google/callback",
     });
 
     console.log("Token exchange successful"); // Debug log
@@ -436,8 +436,8 @@ const googleCallback = async (req, res) => {
 
     // Redirect to frontend with token
     const redirectUrl = `${
-      process.env.FRONTEND_URL || "https://car-rental-frontend-xi-nine.vercel.app"
-    }/auth/success?token=${token}`;
+      process.env.FRONTEND_URL || "https://car-rental-frontend-xi-nine.vercel.app/user_dashboard.html"
+    }/success?token=${token}`;
     console.log("Redirecting to:", redirectUrl); // Debug log
 
     res.redirect(redirectUrl);
