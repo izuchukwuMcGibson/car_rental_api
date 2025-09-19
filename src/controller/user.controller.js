@@ -97,7 +97,8 @@ const verifyEmail = async (req, res) => {
       successTemplate.text
     );
     await user.save();
-    res.status(200).json({ message: "Email verified successfully" });
+       return res.redirect('https://car-rental-frontend-xi-nine.vercel.app/user_auth/email_verified.html');
+    
   } catch (error) {
     return res.status(500).json({ message: `${error.message}` });
   }
@@ -435,7 +436,7 @@ const googleCallback = async (req, res) => {
 
     // Redirect to frontend with token
     const redirectUrl = `${
-      process.env.FRONTEND_URL || "http://localhost:3000"
+      process.env.FRONTEND_URL || "https://car-rental-frontend-xi-nine.vercel.app"
     }/auth/success?token=${token}`;
     console.log("Redirecting to:", redirectUrl); // Debug log
 
@@ -446,7 +447,7 @@ const googleCallback = async (req, res) => {
 
     res.redirect(
       `${
-        process.env.FRONTEND_URL || "http://localhost:3000"
+        process.env.FRONTEND_URL || "https://car-rental-frontend-xi-nine.vercel.app"
       }/auth/error?message=${encodeURIComponent(error.message)}`
     );
   }
