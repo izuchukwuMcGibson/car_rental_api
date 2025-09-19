@@ -435,9 +435,10 @@ const googleCallback = async (req, res) => {
     );
 
     // Redirect to frontend with token
-    const redirectUrl = `${
-      process.env.FRONTEND_URL || "https://car-rental-frontend-xi-nine.vercel.app/user_dashboard.html"
-    }/success?token=${token}`;
+   const redirectUrl = `${
+  process.env.FRONTEND_URL || "https://car-rental-frontend-xi-nine.vercel.app"
+}/user_dashboard.html?token=${token}`;
+res.redirect(redirectUrl);
     console.log("Redirecting to:", redirectUrl); // Debug log
 
     res.redirect(redirectUrl);
