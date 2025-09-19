@@ -16,7 +16,7 @@ const rentCar = async (req, res) => {
     amount: totalPrice,
     currency: "NGN",
     rentingUser,
-    redirect_url: "https://car-rental-api-ks0u.onrender.com", // keep this for demo!
+    redirect_url: "https://car-rental-frontend-xi-nine.vercel.app", // keep this for demo!
     startDate,
     endDate,
     payment_options: "card, banktransfer, ussd",

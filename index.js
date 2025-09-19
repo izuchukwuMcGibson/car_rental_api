@@ -11,7 +11,7 @@ const app = express();
 app.use(express.json())
 app.use(morgan('dev'))
 app.use(cors({
-    origin: ['http://localhost:3000', 'http://127.0.0.1:5500', 'https://your-frontend-domain.com'],
+    origin: ['http://localhost:3000', 'http://127.0.0.1:5500', 'https://car-rental-frontend-xi-nine.vercel.app'],
     credentials: true
 }));
 const PORT = process.env.PORT || 4500;
