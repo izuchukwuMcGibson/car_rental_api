@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { upload, addCar, editCar, deleteCar, getAllCars, searchCars } = require('../controller/admin.controller');
+const { upload, addCar, editCar, deleteCar, getAllCars, searchCars,  } = require('../controller/admin.controller');
 const {isAuthenticated} = require('../middlewares/isAuth');
 const {isAuth,isAdmin} =  require('../middlewares/auth');
-const { rentCar } = require('../controller/rental.controller');
+const { rentCar ,getMyBookings} = require('../controller/rental.controller');
 
 router.get('/get-cars', getAllCars);
 router.get('/search-cars', searchCars);
@@ -18,6 +18,7 @@ router.post('/upload', isAuthenticated, upload.single('image'), (req, res) => {
     mimetype: req.file?.mimetype,
   });
 });
+router.get('/my-bookings/:userId',isAuthenticated,getMyBookings)
 
 router.delete('/delete-car/:carId',isAuthenticated,isAdmin,deleteCar)
 

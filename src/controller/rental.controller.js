@@ -76,6 +76,47 @@ const rentCar = async (req, res) => {
   }
 };
 
+
+
+// Assumes you have authentication middleware that sets req.user.id
+
+const getMyBookings = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // Find cars rented by this user
+    const bookings = await Car.find({ rentedBy: userId })
+      .select("-__v") // Exclude __v field
+      .populate("rentedBy", "name email") // Populate rentedBy with name and email
+
+    // Format response with car info and rental details
+    const formattedBookings = bookings.map(car => ({
+      car: {
+        image: car.image,
+        make: car.make,
+        model: car.model,
+        year: car.year,
+        color: car.color,
+        brand: car.brand,
+        description: car.description,
+        status: car.status,
+        _id: car._id,
+      },
+      startDate: car.startDate,
+      endDate: car.endDate,
+      totalPrice: car.totalPrice,
+      rentedBy: car.rentedBy, // Populated user info
+    }));
+
+    return res.status(200).json({ bookings: formattedBookings });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Could not fetch bookings." });
+  }
+};
+
+
 module.exports = {
-  rentCar
+  rentCar,
+  getMyBookings
 };
